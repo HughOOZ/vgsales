@@ -8,6 +8,7 @@ import seaborn as sns
 
 
 ```python
+#读取文件
 df = pd.read_csv('C:/Users/HughOOZ/Downloads/vgsales-12-4-2019-short.csv')
 df.head()
 ```
@@ -53,7 +54,7 @@ df.head()
   </thead>
   <tbody>
     <tr>
-      <td>0</td>
+      <th>0</th>
       <td>1</td>
       <td>Wii Sports</td>
       <td>Sports</td>
@@ -72,7 +73,7 @@ df.head()
       <td>2006.0</td>
     </tr>
     <tr>
-      <td>1</td>
+      <th>1</th>
       <td>2</td>
       <td>Super Mario Bros.</td>
       <td>Platform</td>
@@ -91,7 +92,7 @@ df.head()
       <td>1985.0</td>
     </tr>
     <tr>
-      <td>2</td>
+      <th>2</th>
       <td>3</td>
       <td>Mario Kart Wii</td>
       <td>Racing</td>
@@ -110,7 +111,7 @@ df.head()
       <td>2008.0</td>
     </tr>
     <tr>
-      <td>3</td>
+      <th>3</th>
       <td>4</td>
       <td>PlayerUnknown's Battlegrounds</td>
       <td>Shooter</td>
@@ -129,7 +130,7 @@ df.head()
       <td>2017.0</td>
     </tr>
     <tr>
-      <td>4</td>
+      <th>4</th>
       <td>5</td>
       <td>Wii Sports Resort</td>
       <td>Sports</td>
@@ -155,41 +156,38 @@ df.head()
 
 
 ```python
-df.info()
+#交叉表
+platGenre = pd.crosstab(df.Platform,df.Genre)
+platGenreTotal = platGenre.sum(axis=1).sort_values(ascending = False)
+#使用seaborn可视化
+sns.set(font_scale=0.8)
+plt.figure(figsize = (16,12))
+sns.barplot(y = platGenreTotal.index, x = platGenreTotal.values, orient = 'h')
+plt.ylabel("Platform")
+plt.xlabel("The amount of games")
+plt.show()
 ```
 
-    <class 'pandas.core.frame.DataFrame'>
-    RangeIndex: 55792 entries, 0 to 55791
-    Data columns (total 16 columns):
-    Rank             55792 non-null int64
-    Name             55792 non-null object
-    Genre            55792 non-null object
-    ESRB_Rating      23623 non-null object
-    Platform         55792 non-null object
-    Publisher        55792 non-null object
-    Developer        55775 non-null object
-    Critic_Score     6536 non-null float64
-    User_Score       335 non-null float64
-    Total_Shipped    1827 non-null float64
-    Global_Sales     19415 non-null float64
-    NA_Sales         12964 non-null float64
-    PAL_Sales        13189 non-null float64
-    JP_Sales         7043 non-null float64
-    Other_Sales      15522 non-null float64
-    Year             54813 non-null float64
-    dtypes: float64(9), int64(1), object(6)
-    memory usage: 6.8+ MB
-    
+
+![png](output_2_0.png)
+
 
 
 ```python
-platGenre = pd.crosstab(df.Platform,df.Genre)
-platGenreTotal = platGenre.sum(axis=1).sort_values(ascending = False)
-sns.set(font_scale=0.8)
-plt.figure(figsize = (16,12))
-sns.barplot(y = platGenreTotal.index, x = platGenreTotal.values, orient = 'h' )
-plt.ylabel = "Platform"
-plt.xlabel = "The amount of games"
+#添加Total列
+platGenre['Total'] = platGenre.sum(axis=1)
+#筛选游戏数大于1000的平台
+popPlatform = platGenre[platGenre['Total'] > 1000].sort_values(by ='Total',ascending = False)
+needdata = popPlatform.loc[:,:'Visual Novel']
+maxi = needdata.values.max()
+mini = needdata.values.min()
+#添加total行
+popPlatformfinal = popPlatform.append(pd.DataFrame(popPlatform.sum(),columns=['total']).T,ignore_index=False)
+#使用seaborn可视化
+sns.set(font_scale=2)
+plt.figure(figsize=(30,16))
+sns.heatmap(popPlatformfinal, vmin = mini, vmax = maxi, annot = True,cmap="YlGnBu", fmt='d')
+plt.xticks(rotation=90)
 plt.show()
 ```
 
@@ -199,51 +197,5 @@ plt.show()
 
 
 ```python
-platGenre.info()
+
 ```
-
-    <class 'pandas.core.frame.DataFrame'>
-    Index: 74 entries, 2600 to iQue
-    Data columns (total 20 columns):
-    Action              74 non-null int64
-    Action-Adventure    74 non-null int64
-    Adventure           74 non-null int64
-    Board Game          74 non-null int64
-    Education           74 non-null int64
-    Fighting            74 non-null int64
-    MMO                 74 non-null int64
-    Misc                74 non-null int64
-    Music               74 non-null int64
-    Party               74 non-null int64
-    Platform            74 non-null int64
-    Puzzle              74 non-null int64
-    Racing              74 non-null int64
-    Role-Playing        74 non-null int64
-    Sandbox             74 non-null int64
-    Shooter             74 non-null int64
-    Simulation          74 non-null int64
-    Sports              74 non-null int64
-    Strategy            74 non-null int64
-    Visual Novel        74 non-null int64
-    dtypes: int64(20)
-    memory usage: 12.1+ KB
-    
-
-
-```python
-platGenre['Total'] = platGenre.sum(axis=1)
-popPlatform = platGenre[platGenre['Total'] > 1000].sort_values(by ='Total',ascending = False)
-needdata = popPlatform.loc[:,:'Visual Novel']
-maxi = needdata.values.max()
-mini = needdata.values.min()
-popPlatformfinal = popPlatform.append(pd.DataFrame(popPlatform.sum(),columns=['total']).T,ignore_index=False)
-sns.set(font_scale=2)
-plt.figure(figsize=(30,16))
-sns.heatmap(popPlatformfinal, vmin = mini, vmax = maxi, annot = True,cmap="YlGnBu", fmt='d')
-plt.xticks(rotation = 90)
-plt.show()
-```
-
-
-![png](output_5_0.png)
-
